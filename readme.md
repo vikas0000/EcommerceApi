@@ -8,3 +8,7 @@
 - models/ - This folder contains the schema definitions for our Mongoose models.
 - controllers/ - This folder contains the actions to be performed on the routes.
 
+# Support
+
+<p id="5">
+Feel free to contact at <i>vikasprajapati95(at)yahoo(dot)com</i> for any query.

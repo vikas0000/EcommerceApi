@@ -1,106 +1,94 @@
 // Importing modules
-const Product = require("../models/products");
+const prod = require("../models/products");
 
 // Controller to create product
-module.exports.create_product = async function(req, res) {
-  try {
+module.exports.createProd = function(req, res) {
+ 
+    const last = prod.find({}).sort({ productId: -1 }).limit(1);
 
-    const lastEntry = await Product.find({})
-      .sort({ productId: -1 })
-      .limit(1);
-    let productId;
-    // If last entry does not exist, productid is 1
-    if (lastEntry.length == 0) {
-      productId = 1;
+    var prodId;
+    // If last entry exist, add 1 to productid of last entry
+    if (last.length != 0) {
+
+      prodId = last[0].productid + 1;
+      
     }
-    // Otherwise, add 1 to productid of last entry
+    // Otherwise, product id equal to 1
     else {
-      productId = lastEntry[0].productid + 1;
+      prodId = 1;
     }
     // Create the new document
-    let newEntry = await Product.create({
-      productid: productId,
+    prod.create({
+
+      productid: prodId,
       name: req.body.name,
       quantity: Number(req.body.quantity)
-    });
-    // Return response
-    return res.status(201).json({
-      data: {
-        product: newEntry
+
+    },function(err, data){
+      if(err){
+          console.log("error in creating Product");
+          return;
       }
-    });
-  } catch (err) {
-    // Error handling
-    console.log("Error creating product", err);
-    return res.status(500).json({
-      message: "Interal server error"
-    });
-  }
+      console.log("##########", data);
+      return res.redirect('back');
+  });
+  
 };
 
 // Controller to fetch all products
-module.exports.get_products = async function(req, res) {
-  try {
+module.exports.getProd = function(req, res) {
+  
     // Fetch all products and ignore _id, createdAt, updatedAt and __v fields
-    let products = await Product.find({}, { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 });
-    // Return response
-    return res.status(200).json({
-      data: {
-        products: products
-      }
+    var p = prod.find({}, function(err,data){
+
+        if(err){
+            console.log('error in display product in db');
+            return;
+        }
+        return res.status(200).json({
+          data: {
+            product: p,
+          },
+          message : "get successfully"
+        });
     });
-  } catch (err) {
-    // Error handling
-    console.log("Error fetching products", err);
-    return res.status(500).json({
-      message: "Interal server error"
-    });
-  }
+  
 };
 
 // Controller to delete a product based on product id
-module.exports.delete_product = async function(req, res) {
-  try {
+module.exports.deleteProd =  function(req, res) {
+  
     // Fetch product based on product id
-    await Product.findOne({ productid: Number(req.params.id) });
+    prod.findOne({ productid: Number(req.params.id) });
     // Delete document
-    Product.remove();
+    prod.remove();
     // Return response
     return res.status(200).json({
       data: {
-        message: "product deleted"
+        message : " product deleted"
       }
+      
     });
-  } catch (err) {
-    // Error handling
-    console.log("Error deleting product", err);
-    return res.status(500).json({
-      message: "Interal server error"
-    });
-  }
+ 
 };
 
 // Controller to upadte a product quantity based on product id
-module.exports.update_quantity = async function(req, res) {
-  try {
+module.exports.updateQ = function(req, res) {
+  
     // Fetch product based on product id
-    let product = await Product.findOne({ productid: Number(req.params.id) });
+    var product = Product.findOne({ productid: Number(req.params.id) });
     // Update product quantity
     product.quantity = Number(product.quantity) + Number(req.query.number);
     // Upadte document in the database
-    await Product.updateOne(product);
+    prod.updateOne(product);
     // Return response
+    
     return res.status(200).json({
       data: {
         product: product,
-        message: " Updated successfully"
+        message : " Updated successfully"
       }
+      
     });
-  } catch (err) {
-    // Error handling
-    console.log("Error updating product", err);
-    return res.status(500).json({
-      message: "Interal server error"
-    });
-  }
+  
 };
